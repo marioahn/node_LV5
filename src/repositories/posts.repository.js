@@ -4,7 +4,7 @@ export class PostsRepository {
   };
 
   createPost = async (userId, nickname, title, content) => {
-    await this.prisma.posts.create({
+    const createdPost = await this.prisma.posts.create({
       data: {
         UserId: userId,
         Nickname: nickname,
@@ -14,6 +14,8 @@ export class PostsRepository {
       }
     });
     // return 굳이 필요없을 듯 -> 생성한 데이터 보여주는 게 아니라서. from 명세서
+      // 근데, test코드 확인해보려면 필요함.. expect(a).toEqual(mockreturn)에서 a가 undefined되니까
+    return createdPost
   };
 
   getPosts = async () => {

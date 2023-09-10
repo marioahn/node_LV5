@@ -13,8 +13,6 @@ export class PostsController {
 
   createPost = async (req, res, next) => {
     try {
-      // 위에서 아래로 내려오니 router의 authMiddleware를 통해 req.user가져올 수 잇지???
-      
       const { userId, nickname } = req.user; 
       const validation = await createdSchema.validateAsync(req.body);
       const { title, content } = validation;
@@ -43,7 +41,6 @@ export class PostsController {
     try {
       const { postId } = req.params;
       const post = await this.postsService.getOnePost(postId);
-
       if (!post) {
         return res.status(404).json({ errorMessage: '게시글이 존재하지 않습니다' })
       };
@@ -65,14 +62,15 @@ export class PostsController {
       // 아래코드가 작동되려면, if (!post) { return null }가 service의 getOnePost에 있어야 함
         // 거기는 return 값이 xx.key이기 때문(null.key는 에러)
       const post = await this.postsService.getOnePost(postId); 
+      
       if (!post) { 
         return res.status(404).json({ errorMessage: '게시글이 존재하지 않습니다' })
       };
-
       if (post['UserId'] !== userId) {
         return res.status(403).json({ errorMessage: '게시글 수정 권한이 없습니다' })
       };
 
+      
       // *의문4
       const updatedPost = await this.postsService.updatePost(postId,title,content);
       

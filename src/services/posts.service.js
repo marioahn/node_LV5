@@ -4,9 +4,10 @@ export class PostsService {
   };
 
   createPost = async (userId,nickname,title,content) => {
-    await this.postsRepository.createPost(
+    const createdPost = await this.postsRepository.createPost(
       userId, nickname, title, content
     );
+    return createdPost
   };
 
   getPosts = async () => {

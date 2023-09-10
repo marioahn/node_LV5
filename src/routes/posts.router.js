@@ -7,7 +7,7 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-// *의문3
+// 의존성 주입 - for 유닛단위 테스트
 const postsRepository = new PostsRepository(prisma);
 const postsService = new PostsService(postsRepository);
 const postsController = new PostsController(postsService);
