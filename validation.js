@@ -14,6 +14,5 @@ export const isJoiData = (title,content) => {
   };
   
   return true;
-
 };
 

@@ -20,7 +20,7 @@ export class UsersService {
   findUserById = async (nickname) => {
     const user = await this.usersRepository.findUserById(nickname);
     
-    return user // 이렇게 보내는게 맞나
+    return user
   };
 
   // login = 

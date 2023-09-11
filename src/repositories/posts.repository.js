@@ -13,7 +13,7 @@ export class PostsRepository {
         likes: 0
       }
     });
-    // return 굳이 필요없을 듯 -> 생성한 데이터 보여주는 게 아니라서. from 명세서
+    // return 굳이 필요없을 듯 -> 명세서에서 response는 그냥 message라서
       // 근데, test코드 확인해보려면 필요함.. expect(a).toEqual(mockreturn)에서 a가 undefined되니까
     return createdPost
   };
@@ -42,6 +42,4 @@ export class PostsRepository {
     });
     return deletedPost;
   };
-
-  // deletePost
 };

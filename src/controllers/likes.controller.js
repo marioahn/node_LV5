@@ -4,7 +4,6 @@ export class LikesController {
   };
 
   // *의문6:확실히 리팩토링 필요할 것 같음 -> 총 3개를 왔다갔다,왔다갔다,왔다갔다 함
-    // layered계층으로 하면, 로직을 더 신경 써야 할듯
   pushLikeButton = async (req,res,next) => {
     try {
       const { postId } = req.params;

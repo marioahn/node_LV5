@@ -6,7 +6,7 @@ import LikesRouter from './likes.router.js';
 const router = express.Router();
 
 
-router.use('/posts', LikesRouter);
+router.use('/posts', LikesRouter); // 아래와 같이 쓰면, api 경로 꼬임(:postId)
 router.use('/posts', [PostsRouter,CommentsRouter]);
 
 

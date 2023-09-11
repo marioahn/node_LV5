@@ -63,10 +63,10 @@ export class PostsController {
         // 거기는 return 값이 xx.key이기 때문(null.key는 에러)
       const post = await this.postsService.getOnePost(postId); 
       
-      if (!post) { 
+      if (!post) {
         return res.status(404).json({ errorMessage: '게시글이 존재하지 않습니다' })
       };
-      if (post['UserId'] !== userId) {
+      if (post['UserId'] !== userId) { // -> !post조건보다 아래에 있어야 에러x
         return res.status(403).json({ errorMessage: '게시글 수정 권한이 없습니다' })
       };
 

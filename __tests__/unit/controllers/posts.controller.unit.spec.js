@@ -151,14 +151,15 @@ describe('Posts Controller Unit Test', () => {
 
 
   // 4. updatePost테스트 - 성공
-  // test('updatePost Method - 성공', async () => {
-  //   const createPostReqUser = {
+  test('updatePost Method - 성공', async () => {
+    expect(1).toEqual(2);
+  //   const updatePostReqUser = {
   //     UserId: 'userId_Success',
   //   };
-  //   const createPostReqParams = {
+  //   const updatePostReqParams = {
   //     postId: 'postId_Success',
   //   };
-  //   const createPostReqBody = {
+  //   const updatePostReqBody = {
   //     title: 'title_Success',
   //     content: 'content_Success',
   //   };
@@ -190,12 +191,11 @@ describe('Posts Controller Unit Test', () => {
   //   expect(mockResponse.json).toHaveBeenCalledWith({
   //     message: '게시글 수정에 성공하였습니다'
   //   });
-
-  // });
+  });
 
   // 5. deletePost테스트
   test('deletePost Method', async () => {
-
+    expect(1).toEqual(2);
   });
 
 });

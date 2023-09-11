@@ -1,3 +1,6 @@
+import { PostsRepository } from '../repositories/posts.repository.js';
+import { prisma } from '../utils/prisma/index.js'
+
 export class CommentsController {
   constructor(commentsService) {
     this.commentsService = commentsService
@@ -14,8 +17,13 @@ export class CommentsController {
         return res.status(412).json({ errorMessage: '댓글을 입력해주세요' })
       };
 
-      // *의문5
-      const post = await this.commentsService.getOnePost(postId);
+      // *의문5 - 근데, 그러면 의존성 깨지긴 하는데.. 에러 처리 관련 코드라서 괜찮나?
+        // 그냥, 직접 prisma로 불러오면 comments.service,repo에 함수 안 써도 됨
+        // 심지어 getOnePost로 post에 이미 있는데, 여기서도 똑같이 중복해서 작성할 필요가 있나?
+        // 갑자기 controller에서 prisma나오니까 좀 위화감이..
+      // const post = await this.commentsService.getOnePost(postId);
+      const post  = await prisma.posts.findUnique({ where: { postId: +postId } });
+
       if (!post) {
         return res.status(404).json({ errorMessage: '게시글이 존재하지 않습니다' })
       };
@@ -83,6 +91,7 @@ export class CommentsController {
   };
 
   // *updateComment와 에러처리 방식이 다름 -> 어느것이 나은가?
+    // deleteComment는 controller가 아닌, repo에서 throw new Error를 하였고, 에러미들웨어에서 나머지.
   deleteComment = async (req,res,next) => {
     try {
       const { userId } = req.user;

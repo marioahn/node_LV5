@@ -1,4 +1,3 @@
-
 export class CommentsService {
   constructor(commentsRepository) {
     this.commentsRepository = commentsRepository
@@ -8,7 +7,7 @@ export class CommentsService {
     const post = await this.commentsRepository.getOnePost(postId);
     if (!post) { return null }
     
-    return post // 여기선 가공 필요없음 -> 걍 빈게시글 존재 여부 확인용(에러)
+    return post // 여기선 가공 필요없음 -> 빈게시글 존재 여부 확인용(에러's)
   };
 
   createComment = async (userId,postId,nickname,comment) => {
