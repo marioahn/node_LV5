@@ -1,5 +1,4 @@
 import joi from 'joi';
-import jwt from 'jsonwebtoken';
 
 const createdSchema = joi.object({
   nickname: joi.string().alphanum().min(3).required(),
@@ -19,10 +18,10 @@ export class UsersController {
       const validation = await createdSchema.validateAsync(req.body);
       const { nickname, password, confirm } = validation;
 
-      // findUserById의 return값은 user지만 이름은 그냥 isExistName으로
-      const isExistName = await this.usersService.findUserById(nickname);
-      if (isExistName) { return res.status(412).json({ errorMessage: '중복된 닉네임입니다' }) };
-
+      // 중복 닉네임 찾기 -> 중복이면, repo에서 throw new CustomError
+      await this.usersService.findUserById(nickname);
+      
+      // body데이터에서 바로 확인 가능하므로, 여기서 바로 에러처리(repo로 보낼 필요x)
       if (password.includes(nickname)) { return res.status(412).json({ errorMessage: '패스워드에 닉네임이 포함되어 있습니다' }) };
       if (password !== confirm) { return res.status(412).json({ errorMessage: '패스워드가 일치하지 않습니다' }) };
 
@@ -40,16 +39,8 @@ export class UsersController {
     try {
       const { nickname, password } = req.body;
       
-      const isExistUser = await this.usersService.findUserById(nickname);
-      if (!isExistUser) { // 해당하는 유저가 존재하지 않을 경우
-        return res.status(412).json({ errorMessage: '닉네임을 확인해주세요' })
-      } else if (isExistUser.password !== password) {
-        return res.status(412).json({ errorMessage: '패스워드를 확인해주세요' })
-      };
-
-      // *의문2 -> jwt.sign도 계층을 나눠서 각각 작성해야하나?
-        // token도 db저장소에 담..겨야 하니까 이것도 service,repo에..? jwt.sign은 repo에서 하고?
-      const token = jwt.sign({ userId: isExistUser.userId }, 'hj_secretkey');
+      // 로그인할 아이디 찾기 -> 에러2개 통과하면 ok
+      const token = await this.usersService.login(nickname,password);
       res.cookie('Authorization', `Bearer ${token}`);
 
       return res.status(200).json({ "token": token });

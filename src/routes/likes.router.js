@@ -7,9 +7,18 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-const likesRepository = new LikesRepository(prisma);
-const likesService = new LikesService(likesRepository);
-const likesController = new LikesController(likesService);
+// const likesRepository = new LikesRepository(prisma);
+// const likesService = new LikesService(likesRepository);
+// const likesController = new LikesController(likesService);
+class LikesFactory {
+  static createLikesComponents(prisma) { // static = 정적메서드
+    const likesRepository = new LikesRepository(prisma);
+    const likesService = new LikesService(likesRepository);
+    const likesController = new LikesController(likesService);
+    return { likesController };
+  }
+};
+const { likesController } = LikesFactory.createLikesComponents(prisma);
 
 
 /** 1. 게시글 좋아요 +- API */

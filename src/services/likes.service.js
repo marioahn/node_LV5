@@ -8,12 +8,9 @@ export class LikesService {
     return post
   };
 
-  updateUserLike = async (userId,aboutLike2) => {
-    await this.likesRepository.updateUserLike(userId,aboutLike2)
-  };
-
-  updatePostLike = async (postId,changedLike) => {
-    await this.likesRepository.updatePostLike(postId,changedLike)
+  updateLike = async (userId,postId,aboutLike) => {
+    const message = await this.likesRepository.updateLike(userId,postId,aboutLike)
+    return message
   };
 
   getLikedPosts = async (aboutLike) => {

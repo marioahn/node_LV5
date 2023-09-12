@@ -29,7 +29,6 @@ export class PostsService {
 
   getOnePost = async (postId) => {
     const post = await this.postsRepository.getOnePost(postId);
-    if (!post) { return null }
     
     return {
       postId: post.postId,
@@ -43,13 +42,13 @@ export class PostsService {
     }
   };
 
-  updatePost = async (postId,title,content) => {
-    const updatedPost = await this.postsRepository.updatePost(postId,title,content);
+  updatePost = async (userId,postId,title,content) => {
+    const updatedPost = await this.postsRepository.updatePost(userId,postId,title,content);
     return updatedPost
   };
 
-  deletePost = async (postId) => {
-    const deletedPost = await this.postsRepository.deletePost(postId);
+  deletePost = async (userId,postId) => {
+    const deletedPost = await this.postsRepository.deletePost(userId,postId);
     return deletedPost
   }
 

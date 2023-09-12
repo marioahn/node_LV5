@@ -9,7 +9,7 @@ import UsersRouter from './routes/users.router.js';
 dotenv.config()
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.DATABASE_PORT;
 
 app.use(LogMiddleware);
 app.use(express.json());

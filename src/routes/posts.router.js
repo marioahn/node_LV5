@@ -7,10 +7,16 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-// 의존성 주입 - for 유닛단위 테스트
-const postsRepository = new PostsRepository(prisma);
-const postsService = new PostsService(postsRepository);
-const postsController = new PostsController(postsService);
+// 의존성 주입 - for 유닛단위 테스트 - by 팩토리패턴
+class PostsFactory {
+  static createPostsComponents(prisma) {
+    const postsRepository = new PostsRepository(prisma);
+    const postsService = new PostsService(postsRepository);
+    const postsController = new PostsController(postsService);
+    return { postsController };
+  }
+};
+const { postsController } = PostsFactory.createPostsComponents(prisma);
 
 
 /** 1. 게시글 작성 API */

@@ -42,7 +42,7 @@ describe('Posts Controller Unit Test', () => {
   });
 
   // 1. getPosts테스트
-  test('getPosts Method', async () => {
+  test('getPosts Success', async () => {
     const samplePosts = [
       {
         "postId": 9,
@@ -78,7 +78,7 @@ describe('Posts Controller Unit Test', () => {
   });
 
   // 2. getOnePost테스트
-  test('getOnePost Method - 성공', async () => {
+  test('getOnePost Success - 성공', async () => {
     const samplePost = {
       "postId": 9,
       "UserId": 3,
@@ -103,7 +103,7 @@ describe('Posts Controller Unit Test', () => {
   });
 
   // 3. createPost테스트
-  test('createPost Method - 성공', async () => {
+  test('createPost Success - 성공', async () => {
     const createPostReqUser = {
       userId: 'userId_Success',
       nickname: 'nickname_Success'
@@ -139,8 +139,8 @@ describe('Posts Controller Unit Test', () => {
     });
   });
 
-  // 3-2. createPost테스트 - body데이터 실패만 모아둠
-  test('createPost Method - wrong Bodydata', async () => {
+  // 3-2. create에러1: body데이터 오류(by Joi)
+  test('createPost Error1 - Wrong Bodydata', async () => {
     expect(isJoiData(1,1)).toEqual(false);
     expect(isJoiData(1,'1')).toEqual(false);
     expect(isJoiData('1',1)).toEqual(false);
@@ -151,51 +151,83 @@ describe('Posts Controller Unit Test', () => {
 
 
   // 4. updatePost테스트 - 성공
-  test('updatePost Method - 성공', async () => {
-    expect(1).toEqual(2);
-  //   const updatePostReqUser = {
-  //     UserId: 'userId_Success',
-  //   };
-  //   const updatePostReqParams = {
-  //     postId: 'postId_Success',
-  //   };
-  //   const updatePostReqBody = {
-  //     title: 'title_Success',
-  //     content: 'content_Success',
-  //   };
-  //   mockRequest.user = createPostReqUser;
-  //   mockRequest.params = createPostReqParams;
-  //   mockRequest.body = createPostReqBody;
+  test('updatePost Success - 성공', async () => {
+    const updatePostReqUser = { userId: 11 };
+    const updatePostReqParams = { postId: '11' };
+    const updatePostReqBody = {
+      title: 'titleTest',
+      content: 'contentTest',
+    };
+    mockRequest.user = updatePostReqUser;
+    mockRequest.params = updatePostReqParams;
+    mockRequest.body = updatePostReqBody;
 
-  //   const updatePostReturnValue = {
-  //     ... createPostReqUser,
-  //     nickname: 'nickname',
-  //     ... createPostReqParams,
-  //     ... createPostReqBody,
-  //   };
+    const updatePostReturnValue = {
+      ... updatePostReqUser,
+      nickname: 'nickname',
+      ... updatePostReqParams,
+      ... updatePostReqBody,
+    };
 
-  //   mockPostsService.updatePost.mockReturnValue(updatePostReturnValue);
-  //   await postsController.updatePost(mockRequest,mockResponse,mockNext);
+    mockPostsService.updatePost.mockReturnValue(updatePostReturnValue);
+    
+    await postsController.updatePost(mockRequest,mockResponse,mockNext);
 
-  // *여기서부터 다 실패
-  //   expect(mockPostsService.updatePost).toHaveBeenCalledTimes(1);
-  //   expect(mockPostsService.updatePost).toHaveBeenCalledTimes(1);
-  //   expect(mockPostsService.updatePost).toHaveBeenCalledWith(
-  //     updatePostReturnValue.postId,
-  //     updatePostReturnValue.title,
-  //     updatePostReturnValue.content
-  //   );
-  //   expect(mockResponse.status).toHaveBeenCalledTimes(1);
-  //   expect(mockResponse.status).toHaveBeenCalledWith(201);
-  //   expect(mockResponse.json).toHaveBeenCalledTimes(1);
-  //   expect(mockResponse.json).toHaveBeenCalledWith({
-  //     message: '게시글 수정에 성공하였습니다'
-  //   });
+    expect(mockPostsService.updatePost).toHaveBeenCalledTimes(1);
+    expect(mockPostsService.updatePost).toHaveBeenCalledWith(
+      updatePostReturnValue.userId,
+      updatePostReturnValue.postId,
+      updatePostReturnValue.title,
+      updatePostReturnValue.content
+    );
+    expect(mockResponse.status).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
+    expect(mockResponse.json).toHaveBeenCalledTimes(1);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      message: '게시글을 수정하였습니다'
+    });
   });
 
+  // 4-2. update에러1: body데이터 오류(by Joi)
+  test('updatePost Error1 - Wrong Bodydata', async () => {
+    expect(isJoiData(1,1)).toEqual(false);
+    expect(isJoiData(1,'1')).toEqual(false);
+    expect(isJoiData('1',1)).toEqual(false);
+    expect(isJoiData('','')).toEqual(false);
+    expect(isJoiData('','a')).toEqual(false);
+    expect(isJoiData('a','')).toEqual(false);
+  });
+  
+
   // 5. deletePost테스트
-  test('deletePost Method', async () => {
-    expect(1).toEqual(2);
+  test('deletePost Success', async () => {
+    const updatePostReqUser = { userId: 11 };
+    const updatePostReqParams = { postId: '11' };
+
+    mockRequest.user = updatePostReqUser;
+    mockRequest.params = updatePostReqParams;
+
+    const updatePostReturnValue = {
+      ... updatePostReqUser,
+      nickname: 'nickname',
+      ... updatePostReqParams
+    };
+
+    mockPostsService.deletePost.mockReturnValue(updatePostReturnValue);
+    
+    await postsController.deletePost(mockRequest,mockResponse,mockNext);
+
+    expect(mockPostsService.deletePost).toHaveBeenCalledTimes(1);
+    expect(mockPostsService.deletePost).toHaveBeenCalledWith(
+      updatePostReturnValue.userId,
+      updatePostReturnValue.postId,
+    );
+    expect(mockResponse.status).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
+    expect(mockResponse.json).toHaveBeenCalledTimes(1);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      message: '게시글을 삭제하였습니다'
+    });
   });
 
 });

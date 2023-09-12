@@ -3,13 +3,6 @@ export class CommentsService {
     this.commentsRepository = commentsRepository
   };
 
-  getOnePost = async (postId) => {
-    const post = await this.commentsRepository.getOnePost(postId);
-    if (!post) { return null }
-    
-    return post // 여기선 가공 필요없음 -> 빈게시글 존재 여부 확인용(에러's)
-  };
-
   createComment = async (userId,postId,nickname,comment) => {
     await this.commentsRepository.createComment(
       userId,postId,nickname,comment
@@ -33,18 +26,16 @@ export class CommentsService {
     });
   };
 
-  updateComment = async (userId,commentId,comment) => {
-    const updatedComment = await this.commentsRepository.updateComment(
-      userId,commentId,comment
+  updateComment = async (postId,userId,commentId,comment) => {
+    await this.commentsRepository.updateComment(
+      postId,userId,commentId,comment
     );
-    return updatedComment;
   };
 
   deleteComment = async (userId,postId,commentId) => {
-    const deletedComment = await this.commentsRepository.deleteComment(
+    await this.commentsRepository.deleteComment(
       userId,postId,commentId
     );
-    return deletedComment;
   };
 
 };

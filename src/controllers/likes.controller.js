@@ -3,41 +3,22 @@ export class LikesController {
     this.likesService = likesService
   };
 
-  // *의문6:확실히 리팩토링 필요할 것 같음 -> 총 3개를 왔다갔다,왔다갔다,왔다갔다 함
+  // 1. 좋아요버튼 누르기(+-)
   pushLikeButton = async (req,res,next) => {
     try {
       const { postId } = req.params;
       const { userId, aboutLike } = req.user;
+      
+      const message = await this.likesService.updateLike(userId,postId,aboutLike); // 등록 or 취소
 
-      const post = await this.likesService.getOnePost(postId);
-      if (!post) {
-        return res.status(404).json({ errorMessage: '게시글이 존재하지 않습니다' })
-      };
-
-      // step1. 좋아요를 누르지 않은 상태라면? -> 추가하기
-      if (!aboutLike.includes(`${postId} `)) {
-        // 공백으로 간 게시글id구분 -> '1 2 3 23 ' vs ('12323')
-        const changedLike = post.likes+1
-        const aboutLike2 = aboutLike + postId + ' '
-        await this.likesService.updateUserLike(userId,aboutLike2);
-        await this.likesService.updatePostLike(postId,changedLike);
-
-        return res.status(200).json({ message: '게시글의 좋아요를 등록하였습니다' });
-      }
-      // step2. 좋아요를 이미 누른 상태라면? -> 취소하기
-      else {
-        const changedLike = post.likes-1
-        const aboutLike2 = aboutLike.replaceAll(`${postId} `, ''); // postId+' '으로 찾기
-        await this.likesService.updateUserLike(userId,aboutLike2);
-        await this.likesService.updatePostLike(postId,changedLike);
-
-        return res.status(200).json({ message: '게시글의 좋아요를 취소하였습니다' });
-      }
-    } catch (err) {
+      return res.status(200).json({ message: `게시글의 좋아요를 ${message}하였습니다` });
+    } 
+    catch (err) {
       next(err)
     }
   };
 
+  // 2. 좋아요 눌러진 게시글 전체 조회
   getLikedPosts = async (req,res,next) => {
     try {
       const { aboutLike } = req.user;

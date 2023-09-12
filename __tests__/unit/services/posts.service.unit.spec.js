@@ -19,8 +19,23 @@ describe('Posts Service Unit Test', () => {
     jest.resetAllMocks(); // 모든 Mock을 초기화한다
   })
 
-  // 1. getPosts테스트
-  test('getPosts Method', async () => {
+    // 1. createPost테스트
+    test('createPost Success', async () => {
+      const mockReturn = 'mockReturn';
+      mockPostsRepository.createPost.mockReturnValue(mockReturn);
+  
+      const [tmpUserId, tmpNickName, tmpTitle, tmpContent] = ['tmpU', 'tmpN', 'tmpT', 'tmpC']
+      const createdPost = await postsService.createPost(
+        tmpUserId, tmpNickName, tmpTitle, tmpContent
+      );
+  
+      expect(createdPost).toEqual(mockReturn);
+      expect(mockPostsRepository.createPost).toHaveBeenCalledTimes(1);
+      expect(mockPostsRepository.createPost).toHaveBeenCalledWith('tmpU', 'tmpN', 'tmpT', 'tmpC');
+    });
+
+  // 2. getPosts테스트
+  test('getPosts Success', async () => {
     const samplePosts = [
       {
         "postId": 9,
@@ -49,8 +64,8 @@ describe('Posts Service Unit Test', () => {
     expect(mockPostsRepository.getPosts).toHaveBeenCalledTimes(1);
   });
 
-  // 2. getOnePosts테스트
-  test('getOnePosts Method', async () => {
+  // 3. getOnePosts테스트
+  test('getOnePosts Success', async () => {
     const samplePost = {
       "postId": 9,
       "UserId": 3,
@@ -71,47 +86,30 @@ describe('Posts Service Unit Test', () => {
     expect(mockPostsRepository.getOnePost).toHaveBeenCalledWith(tmpPostId);
   });
 
-  // 3. createPost테스트
-  test('createPost Method', async () => {
-    const mockReturn = 'mockReturn';
-    mockPostsRepository.createPost.mockReturnValue(mockReturn);
-
-    const [tmpUserId, tmpNickName, tmpTitle, tmpContent] = ['tmpU', 'tmpN', 'tmpT', 'tmpC']
-    const createdPost = await postsService.createPost(
-      tmpUserId, tmpNickName, tmpTitle, tmpContent
-    );
-
-    expect(createdPost).toEqual(mockReturn);
-    expect(mockPostsRepository.createPost).toHaveBeenCalledTimes(1);
-    expect(mockPostsRepository.createPost).toHaveBeenCalledWith('tmpU', 'tmpN', 'tmpT', 'tmpC');
-  });
-
   // 4. updatePost테스트
-  test('updatePost Method', async () => {
+  test('updatePost Success', async () => {
     const mockReturn = 'mockReturn';
     mockPostsRepository.updatePost.mockReturnValue(mockReturn);
 
-    const [tmpPostId, tmpTitle, tmpContent] = ['tmpP', 'tmpT', 'tmpC']
     const updatedPost = await postsService.updatePost(
-      tmpPostId, tmpTitle, tmpContent
+      1,'1','tmpTitle','tmpContent' // UserId,postId,title,content
     );
 
     expect(updatedPost).toEqual(mockReturn);
     expect(mockPostsRepository.updatePost).toHaveBeenCalledTimes(1);
-    expect(mockPostsRepository.updatePost).toHaveBeenCalledWith('tmpP', 'tmpT', 'tmpC');
+    expect(mockPostsRepository.updatePost).toHaveBeenCalledWith(1,'1','tmpTitle','tmpContent');
 
   });
 
   // 5. deletePost테스트
-  test('deletePost Method', async () => {
+  test('deletePost Success', async () => {
     const mockReturn = 'mockReturn';
     mockPostsRepository.deletePost.mockReturnValue(mockReturn);
 
-    const tmpPostId = '1'
-    const deletedPost = await postsService.deletePost(tmpPostId);
+    const deletedPost = await postsService.deletePost(1,'1'); // userId, postId
 
     expect(deletedPost).toEqual(mockReturn);
     expect(mockPostsRepository.deletePost).toHaveBeenCalledTimes(1);
-    expect(mockPostsRepository.deletePost).toHaveBeenCalledWith(tmpPostId);
+    expect(mockPostsRepository.deletePost).toHaveBeenCalledWith(1,'1');
   });
 });

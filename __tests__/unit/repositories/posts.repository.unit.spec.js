@@ -21,7 +21,7 @@ describe('Posts Repository Unit Test', () => {
   })
 
   // 1. getPosts테스트
-  test('getPosts Method', async () => {
+  test('getPosts Success', async () => {
     const mockReturn = 'mockReturn';
     mockPrisma.posts.findMany.mockReturnValue(mockReturn);
     
@@ -32,7 +32,7 @@ describe('Posts Repository Unit Test', () => {
   });
 
   // 2. getOnePost테스트
-  test('getOnePost Method', async () => {
+  test('getOnePost Success', async () => {
     const mockReturn = 'mockReturn'; 
     // *의문7: 왜 제대로 비교가 되는 거지 <- postId는 안 넣었는데..? 왜 아래 post랑 비교가 됨? 
       // 그냥, mockprisma의 findUnique를 실행시킨 결과가, repo의 getOnePost와 같은지.
@@ -52,8 +52,24 @@ describe('Posts Repository Unit Test', () => {
     });
   });
 
+    // 2-1. update에러1: 게시글 존재x경우
+    test('getOnePost Error1 - 게시글x', async () => {
+      const samplePost = null
+      mockPrisma.posts.findUnique.mockReturnValue(samplePost);
+  
+      try {
+        await postsRepository.getOnePost('555') // 있을리 없는 변수 넣어서 실행
+      } catch (err) {
+        expect(mockPrisma.posts.findUnique).toHaveBeenCalledTimes(1);
+        expect(mockPrisma.posts.findUnique).toHaveBeenCalledWith({
+          where: { postId: +'555' }
+        });
+        expect(err.message).toEqual('게시글이 존재하지 않습니다');
+      }
+    });
+
   // 3. createPost테스트
-  test('createPost Method', async () => {
+  test('createPost Success', async () => {
     const mockReturn = 'mockReturn';
     mockPrisma.posts.create.mockReturnValue(mockReturn);
 
@@ -77,46 +93,155 @@ describe('Posts Repository Unit Test', () => {
   });
 
   // 4. updatePost테스트
-  test('updatePost Method', async () => {
-    const mockReturn = 'mockReturn';
-    mockPrisma.posts.update.mockReturnValue(mockReturn);
+  test('updatePost Success', async () => {
+    const samplePost = {
+      'UserId': 333,
+      'postId': '111',
+      'Nickname': '002',
+      'title': 'aa',
+      'content': 'aa',
+      "createdAt": new Date("2023-09-15T07:47:15.980Z"),
+      "updatedAt": new Date("2023-09-09T07:49:17.585Z")
+    }
+    mockPrisma.posts.findUnique.mockReturnValue(samplePost);
+    mockPrisma.posts.update.mockReturnValue(samplePost);
 
-    // *의문7-2: 의문7이 여기서 해결된다 비록 updatePost에 인자를 updatePostParams.postId~content 안넣고,
-      // 한개도 안넣어도 실행은 되고 테스트 실패도 안 뜨지만, 아래의 toHaveBeenCalledWith에서 에러가 뜸ㅇㅇ
-    const updatePostParams = {
-      postId: '1',
-      title: 'tmpTitle',
-      content: 'tmpContent'
-    };
+    const updatedData = ['bb','bb']
+
     const updatedPost = await postsRepository.updatePost(
-      updatePostParams.postId,
-      updatePostParams.title,
-      updatePostParams.content,
+      samplePost.UserId,
+      samplePost.postId,
+      updatedData[0], // samplePost.title대신 바뀔 내용
+      updatedData[1]
     );
     
-    expect(updatedPost).toEqual(mockReturn);
+    // expect(updatedPost).toEqual(samplePost); // true나옴 why?
+      // updatedPost가 진짜로 바뀌면 그건 진짜 db변경이니 그대로인거임?
+      // 즉, updatedPost와 samplePost가 같다가 나오는게 진짜 의도o인거임? 이상한데...
+      // 애초에, 위에서 MockPrisma.posts.udpate한 결과는 그대로 sample이니..
+    expect(mockPrisma.posts.findUnique).toHaveBeenCalledTimes(1);
+    expect(mockPrisma.posts.findUnique).toHaveBeenCalledWith({
+      where: { postId: +samplePost.postId }
+    });
     expect(mockPrisma.posts.update).toHaveBeenCalledTimes(1);
     expect(mockPrisma.posts.update).toHaveBeenCalledWith({
       data: {
-        title: updatePostParams.title,
-        content: updatePostParams.content,
+        title: updatedData[0],
+        content: updatedData[1],
       },
-      where: { postId: +updatePostParams.postId }
+      where: { postId: +samplePost.postId }
     });
+  });
+
+  // 4-2. update에러1: 게시글 존재x경우
+  test('updatePost Error1 - 게시글x', async () => {
+    const samplePost = null
+    mockPrisma.posts.findUnique.mockReturnValue(samplePost);
+
+    try {
+      await postsRepository.updatePost(5555,'555','any','any') // 있을리 없는 변수 넣어서 실행
+    } catch (err) {
+      expect(mockPrisma.posts.findUnique).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.posts.findUnique).toHaveBeenCalledWith({
+        where: { postId: +'555' }
+      });
+      expect(mockPrisma.posts.update).toHaveBeenCalledTimes(0); // 에러때문에 updatex -> 0
+      expect(err.message).toEqual('게시글이 존재하지 않습니다');
+    };
+  });
+
+  // 4-3. update에러2: 게시글 수정권한x
+  test('updatePost Error2 - 수정권한x', async () => {
+    const samplePost = {
+      'UserId': 333,
+      'postId': '111',
+      'Nickname': '002',
+      'title': 'aa',
+      'content': 'aa',
+      "createdAt": new Date("2023-09-15T07:47:15.980Z"),
+      "updatedAt": new Date("2023-09-09T07:49:17.585Z")
+    }
+    mockPrisma.posts.findUnique.mockReturnValue(samplePost);
+    mockPrisma.posts.update.mockReturnValue(samplePost);
+
+    try {
+      await postsRepository.updatePost(334,'111','any','any2') // UserId를 이상하게 넣기
+    } catch (err) {
+      expect(mockPrisma.posts.findUnique).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.posts.findUnique).toHaveBeenCalledWith({
+        where: { postId: +'111' }
+      });
+      expect(mockPrisma.posts.update).toHaveBeenCalledTimes(0); // 에러때문에 updatex -> 0
+      expect(err.message).toEqual('게시글 수정 권한이 없습니다');
+    };
   });
 
   // 5. deletePost테스트
-  test('deletePost Method', async () => {
-    const mockReturn = 'mockReturn'
-    mockPrisma.posts.delete.mockReturnValue(mockReturn);
+  test('deletePost Success', async () => {
+    const samplePost = {
+      'postId': 111,
+      'UserId': 333,
+      'Nickname': '002',
+      'title': 'aa',
+      'content': 'aa',
+      "createdAt": new Date("2023-09-15T07:47:15.980Z"),
+      "updatedAt": new Date("2023-09-09T07:49:17.585Z")
+    }
+    mockPrisma.posts.findUnique.mockReturnValue(samplePost);
+    // 아래의 delete함수는 실제 실행은 아님 -> 따라서, 아래 calledTimes는 2가 아니라 1 그대로.
+    mockPrisma.posts.delete.mockReturnValue(samplePost); 
+    
+    const deletedPost = await postsRepository.deletePost(333,111); // sample의 UserId,postId
 
-    const tmpPostId = '1'
-    const deletedPost = await postsRepository.deletePost(tmpPostId);
-
-    expect(deletedPost).toEqual(mockReturn);
+    expect(deletedPost).toEqual(samplePost);
     expect(mockPrisma.posts.delete).toHaveBeenCalledTimes(1);
     expect(mockPrisma.posts.delete).toHaveBeenCalledWith({
-      where: { postId: +tmpPostId }
+      where: { postId: 111 }
     });
   });
+
+  // 5-2. delete에러1: 게시글 존재x경우
+  test('deletePost Error1 - 게시글x', async () => {
+    const samplePost = null
+    mockPrisma.posts.findUnique.mockReturnValue(samplePost);
+
+    try {
+      await postsRepository.deletePost(5555,'555','any','any') // 있을리 없는 변수 넣어서 실행
+    } catch (err) {
+      expect(mockPrisma.posts.findUnique).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.posts.findUnique).toHaveBeenCalledWith({
+        where: { postId: +'555' }
+      });
+      expect(mockPrisma.posts.delete).toHaveBeenCalledTimes(0); // 에러때문에 updatex -> 0
+      expect(err.message).toEqual('게시글이 존재하지 않습니다');
+    };
+  });
+
+  // 4-3. delete에러2: 게시글 삭제권한x
+  test('deletePost Error2 - 삭제권한x', async () => {
+    const samplePost = {
+      'UserId': 333,
+      'postId': '111',
+      'Nickname': '002',
+      'title': 'aa',
+      'content': 'aa',
+      "createdAt": new Date("2023-09-15T07:47:15.980Z"),
+      "updatedAt": new Date("2023-09-09T07:49:17.585Z")
+    }
+    mockPrisma.posts.findUnique.mockReturnValue(samplePost);
+    mockPrisma.posts.delete.mockReturnValue(samplePost);
+
+    try {
+      await postsRepository.deletePost(334,'111','any','any2') // UserId를 이상하게 넣기
+    } catch (err) {
+      expect(mockPrisma.posts.findUnique).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.posts.findUnique).toHaveBeenCalledWith({
+        where: { postId: +'111' }
+      });
+      expect(mockPrisma.posts.delete).toHaveBeenCalledTimes(0); // 에러때문에 updatex -> 0
+      expect(err.message).toEqual('게시글 삭제 권한이 없습니다');
+    };
+  });
+
+
 });

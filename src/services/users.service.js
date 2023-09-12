@@ -16,14 +16,18 @@ export class UsersService {
     };
   };
 
-  // 회원가입 시, 중복닉네임 확인용으로 만들어야 했던 함수..
+  // 회원가입 시, 중복닉네임 확인용
   findUserById = async (nickname) => {
     const user = await this.usersRepository.findUserById(nickname);
     
     return user
   };
 
-  // login = 
+  login = async (nickname,password) => {
+    const token = await this.usersRepository.login(nickname,password);
+
+    return token
+  }
 
 
 };

@@ -1,14 +1,33 @@
+import { CustomError } from "../errors/customError.js";
+
 export class CommentsRepository {
   constructor(prisma) {
     this.prisma = prisma
   };
 
-  getOnePost = async (postId) => {
+  getComments = async (postId) => {
     const post = await this.prisma.posts.findUnique({ where: { postId: +postId } });
-    return post;
+    if (!post) {
+      throw new CustomError(404,'게시글이 존재하지 않습니다')
+    };
+
+    const comments = await this.prisma.comments.findMany({
+      where: { PostId: +postId }
+    });
+
+    if (comments.length === 0) {
+      throw new CustomError(404,'아직 작성한 댓글이 없습니다')
+    };
+
+    return comments;
   };
 
   createComment = async (userId,postId,nickname,comment) => {
+    const post = await this.prisma.posts.findUnique({ where: { postId: +postId } });
+    if (!post) {
+      throw new CustomError(404,'게시글이 존재하지 않습니다')
+    };
+
     await this.prisma.comments.create({
       data: {
         UserId: userId,
@@ -19,44 +38,53 @@ export class CommentsRepository {
     });
   };
 
-  getComments = async (postId) => {
-    const comments = await this.prisma.comments.findMany({
-      where: { PostId: +postId }
+  updateComment = async (postId,userId,commentId,comment) => {
+    // 에러체크1
+    const post = await this.prisma.posts.findUnique({ where: { postId: +postId } });
+    if (!post) {
+      throw new CustomError(404,'게시글이 존재하지 않습니다')
+    };
+    
+    // 에러체크2
+    const commentCheck = await this.prisma.comments.findUnique({
+      where: { commentId: +commentId }
     });
-    return comments;
-  };
+    if (!commentCheck) {
+      throw new CustomError(404,'댓글이 존재하지 않습니다')
+    };
+    if (commentCheck.UserId !== userId) {
+      throw new CustomError(403,'댓글의 수정권한이 없습니다')
+    }
 
-  updateComment = async (userId,commentId,comment) => {
-    // 에러처리용 변수 - isExistComment, isYourComment
-    const isExistComment = await this.prisma.comments.findUnique({ where: { commentId: +commentId } })
-    if (!isExistComment) { return '댓글검색이 안됨' };
-    const isYourComment = await this.prisma.comments.findUnique({ where: { UserId: userId,commentId: +commentId } });
-    if (!isYourComment) { return '내가 작성한 댓글이 아님'}
-
-    // 위 통과했으면, 이제서야 여기서 update수행
-    const updatedComment = await this.prisma.comments.update({
+    // 위 통과했으면, 비로소 여기서 댓글update 수행
+    await this.prisma.comments.update({
       where: { commentId: +commentId },
       data: { comment }
     });
-    return updatedComment;
   };
 
   deleteComment = async (userId,postId,commentId) => {
-    const isExistComment = await this.prisma.comments.findUnique({ where: { commentId: +commentId } })
-    // 아래 2개 if문은 에러처리미들웨어에서 res.status.json형태로 처리 가능
-    if (!isExistComment) { 
-      throw new Error('댓글이 존재하지 않습니다') // res.status(412).json~형태는 여기서 불가
-    }
-      // isExistComment는 존재하는데, userId가 서로 다른 경우
-    if (isExistComment['UserId'] !== userId) {
-      throw new Error('댓글의 수정 권한이 없습니다')
+    // 에러체크1
+    const post = await this.prisma.posts.findUnique({ where: { postId: +postId } });
+    if (!post) {
+      throw new CustomError(404,'게시글이 존재하지 않습니다')
     };
 
-    // 여기까지 통과되면 비로서 delete수행
-    const deletedComment = await this.prisma.comments.delete({
-      where: { PostId: +postId,commentId: +commentId },
+    // 에러체크2
+    const commentCheck = await this.prisma.comments.findUnique({
+      where: { commentId: +commentId }
     });
-    return deletedComment;
+    if (!commentCheck) { 
+      throw new CustomError(404,'댓글이 존재하지 않습니다')
+    };
+    if (commentCheck.UserId !== userId) {
+      throw new CustomError(403,'댓글의 삭제 권한이 없습니다')
+    };
+
+    // 여기까지 통과되면 비로소 댓글 delete 수행
+    await this.prisma.comments.delete({
+      where: { PostId: +postId, commentId: +commentId },
+    });
   };
 
 

@@ -6,9 +6,15 @@ import { UsersRepository } from '../repositories/users.repository.js';
 
 const router = express.Router();
 
-const usersRepository = new UsersRepository(prisma);
-const usersService = new UsersService(usersRepository);
-const usersController = new UsersController(usersService);
+class UsersFactory {
+  static createUsersComponents(prisma) {
+    const usersRepository = new UsersRepository(prisma);
+    const usersService = new UsersService(usersRepository);
+    const usersController = new UsersController(usersService);
+    return { usersController };
+  }
+};
+const { usersController } = UsersFactory.createUsersComponents(prisma);
 
 
 /** 1. 회원가입API */
