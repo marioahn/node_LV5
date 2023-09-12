@@ -1,7 +1,5 @@
 ### 1. Todo
-- 테스트 코드: controller.unit.spec.js에서 **update / delete** 두개 작성 못함
-
-- bcrypt / prettier / dotenv에 전부 숨기기 / asyncahandler
+- prettier / bcrypt / dotenv에 전부 숨기기 / asyncahandler
 - swagger
 
 ---
@@ -9,6 +7,6 @@
 ![Alt text](LV5-ERD.png)
 ---
 ### 3. Lv5 정리 및 TIL
-- opened로
+- https://marioa.notion.site/Node-js-Lv5-TIL-9-12-4786ac44bee74aebaa9e13da4b6ddaee?pvs=4
 
 ---
